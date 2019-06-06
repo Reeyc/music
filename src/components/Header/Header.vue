@@ -1,7 +1,8 @@
+<!--公共头部区域-->
 <template>
   <div class="header">
     <div class="icon"></div>
-    <h1 class="text">Hello World</h1>
+    <h1 class="text">My QQ-Music</h1>
   </div>
 </template>
 

@@ -1,3 +1,4 @@
+<!--公共导航栏-->
 <template>
   <div class="nav">
     <router-link to="/recommend" tag="div" class="nav-item">

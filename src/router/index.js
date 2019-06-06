@@ -10,7 +10,10 @@ export default new Router({
   }, {
     path: '/recommend',
     name: 'recommend',
-    component: () => import('@/components/Recommend/Recommend')
+    component: () => import('@/components/Recommend/Recommend'),
+    meta: {
+      keepAlive: true
+    }
   }, {
     path: '/rank',
     name: 'rank',
