@@ -46,8 +46,6 @@ export default {
   },
   watch: {
     data() {
-      console.log(this.$refs.wrapper);
-
       setTimeout(() => {
         this.refresh();
       }, 50);

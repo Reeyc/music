@@ -8,7 +8,9 @@
         <!-- 轮播图 -->
         <swiper :options="swiperOptions" v-if="slideLength" class="slide-wrapper">
           <swiper-slide v-for="item in slideList" :key="item.id" class="slide-list">
-            <img :src="item.picUrl" @load="imgLoad" class="slide-img">
+            <a :href="item.linkUrl">
+              <img :src="item.picUrl" @load="imgLoad" class="slide-img">
+            </a>
           </swiper-slide>
           <div class="swiper-pagination" slot="pagination"></div>
         </swiper>
@@ -18,7 +20,7 @@
           <ul>
             <li v-for="item of recommendList" :key="item.dissid" class="item">
               <div class="icon">
-                <img :src="item.imgurl" class="icon-img">
+                <img v-lazy="item.imgurl" class="icon-img">
               </div>
               <div class="text">
                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -27,6 +29,8 @@
             </li>
           </ul>
         </div>
+        <!-- loading -->
+        <loading class="loading-container" v-show="!recommendList.length"></loading>
       </div>
     </scroll>
   </div>
@@ -34,6 +38,7 @@
 
 <script>
 import Scroll from "base/scroll/Scroll";
+import Loading from "base/loading/Loading";
 import { getSlide, getDiscList } from "api/recommend";
 import { ERR_OK } from "api/config";
 export default {
@@ -86,7 +91,8 @@ export default {
     }
   },
   components: {
-    Scroll
+    Scroll,
+    Loading
   }
 };
 </script>
@@ -144,4 +150,6 @@ export default {
 .desc
   color: $color-text-d
   no-wrap()
+.loading-container
+  margin-top: 50px
 </style>
