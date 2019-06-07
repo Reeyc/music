@@ -3,6 +3,9 @@
   <div class="header">
     <div class="icon"></div>
     <h1 class="text">My QQ-Music</h1>
+    <router-link tag="div" class="mine" to="/user">
+      <i class="icon-mine"></i>
+    </router-link>
   </div>
 </template>
 
@@ -33,4 +36,13 @@ export default {};
   vertical-align: top
   line-height: 44px
   font-size: $font-size-large
+.mine
+  position: absolute
+  top: 0
+  right: 0
+.icon-mine
+  display: block
+  padding: 12px
+  font-size: 20px
+  color: $color-theme
 </style>

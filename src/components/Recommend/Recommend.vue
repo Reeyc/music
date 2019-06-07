@@ -1,30 +1,39 @@
 <!--推荐-->
 <template>
-  <div>
-    <swiper :options="swiperOptions" v-if="slideLength" class="wrapper">
-      <swiper-slide v-for="item in slideList" :key="item.id" class="slide-list">
-        <img :src="item.picUrl" class="slide-img">
-      </swiper-slide>
-      <div class="swiper-pagination" slot="pagination"></div>
-    </swiper>
-    <div class="recommend-list">
-      <h1 class="list-title">热门歌单推荐</h1>
-      <ul>
-        <li v-for="item of recommendList" :key="item.dissid" class="item">
-          <div class="icon">
-            <img :src="item.imgurl" class="icon-img">
-          </div>
-          <div class="text">
-            <h2 class="name" v-html="item.creator.name"></h2>
-            <p class="desc" v-html="item.dissname"></p>
-          </div>
-        </li>
-      </ul>
-    </div>
+  <div class="fixed">
+    <!-- wrapper -->
+    <scroll :data="recommendList" class="wrapper" ref="scroll">
+      <!-- slot -->
+      <div>
+        <!-- 轮播图 -->
+        <swiper :options="swiperOptions" v-if="slideLength" class="slide-wrapper">
+          <swiper-slide v-for="item in slideList" :key="item.id" class="slide-list">
+            <img :src="item.picUrl" @load="imgLoad" class="slide-img">
+          </swiper-slide>
+          <div class="swiper-pagination" slot="pagination"></div>
+        </swiper>
+        <!-- 热门推荐 -->
+        <div class="recommend-list">
+          <h1 class="list-title">热门歌单推荐</h1>
+          <ul>
+            <li v-for="item of recommendList" :key="item.dissid" class="item">
+              <div class="icon">
+                <img :src="item.imgurl" class="icon-img">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script>
+import Scroll from "base/scroll/Scroll";
 import { getSlide, getDiscList } from "api/recommend";
 import { ERR_OK } from "api/config";
 export default {
@@ -61,21 +70,41 @@ export default {
           this.recommendList = res.data.list;
         }
       });
+    },
+    imgLoad() {
+      if (!this.flag) {
+        //异步请求的图片加载完毕后，better-scroll重新计算高度
+        //当然如果图片的元素已有高度，则不用等图片加载完毕
+        this.$refs.scroll.refresh();
+        this.flag = true;
+      }
     }
   },
   computed: {
     slideLength() {
       return this.slideList.length;
     }
+  },
+  components: {
+    Scroll
   }
 };
 </script>
 
 <style lang="stylus" scoped>
 @import '~common/stylus/variable'
-.wrapper >>> .swiper-pagination-bullet-active
+@import '~common/stylus/mixin'
+.slide-wrapper >>> .swiper-pagination-bullet-active
   background-color: #fff
-.slider-wrapper
+.fixed
+  position: fixed
+  bottom: 0 /* fixed + bottom:0 设置元素高度为当前页面可视区域高度，配合Better-Scroll，超出高度滚动 */
+  top: 88px
+  width: 100%
+.wrapper
+  height: 100%
+  overflow: hidden
+.slide-wrapper
   position: relative
   width: 100%
   overflow: hidden
@@ -87,7 +116,6 @@ export default {
 .slide-img
   width: 100%
 .recommend-list, .list-title
-  height: 65px
   line-height: 65px
   text-align: center
   font-size: $font-size-medium
@@ -104,12 +132,16 @@ export default {
   display: block
   width: 100%
 .text
+  flex: 1
+  min-width: 0 /* 脱标的元素设置min-width子元素才能溢出显示省略号 */
   line-height: 20px
   text-align: left
   font-size: $font-size-medium
 .name
   margin-bottom: 10px
   color: $color-text
+  no-wrap()
 .desc
   color: $color-text-d
+  no-wrap()
 </style>
