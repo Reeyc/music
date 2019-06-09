@@ -1,53 +1,156 @@
 <template>
-  <scroll class="list-view" ref="listview">
-    <!--scroll包裹层-->
-    <ul>
-      <!--scroll内容层-->
-      <li v-for="(group,index) of data" :key="index" class="list-group" ref="list_group">
+  <scroll
+    class="list-view"
+    ref="listview"
+    :listenScroll="listenScroll"
+    :probeType="probeType"
+    @scroll="scroll"
+  >
+    <!-- 数据表 -->
+    <div>
+      <div v-for="(group,index) of singers" :key="index" class="list-group" ref="list_group">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
           <li v-for="item of group.item" :key="item.id" class="list-group-item">
-            <img :src="item.avatar" class="avatar">
+            <img v-lazy="item.avatar" class="avatar">
             <span class="name">{{item.name}}</span>
           </li>
         </ul>
-      </li>
-    </ul>
+      </div>
+    </div>
+    <!-- 字母表 -->
     <div class="shortcut-list">
-      <ul>
+      <ul ref="shortcut">
         <li
           v-for="(item,index) of shortcutList"
           :key="index"
           :data-index="index"
           class="item"
-          @touchstart="handleTouchStart"
+          :class="{'current':currentIndex===index}"
+          @touchstart.stop.prevent="handleTouchStart"
+          @touchmove.stop.prevent="handleTouchMove"
         >{{item}}</li>
       </ul>
     </div>
+    <!-- 固定标题 -->
+    <div class="fixed-list" ref="fixed" v-show="fixedTitle">
+      <div class="fixed-title">{{fixedTitle}}</div>
+    </div>
+    <!-- loading -->
   </scroll>
 </template>
 
 <script>
 import Scroll from "base/scroll/Scroll";
+const SHORTCUT_HEIGHT = 18;
+const TITLE_HEIGHT = 30;
 export default {
+  created() {
+    this.touch = {};
+    this.listenScroll = true;
+    this.probeType = 3;
+  },
+  data() {
+    return {
+      scrollY: -1,
+      currentIndex: 0,
+      diff: -1
+    };
+  },
   props: {
-    data: {
+    singers: {
       type: Array,
       default: []
     }
   },
   computed: {
     shortcutList() {
-      return this.data.map(item => {
+      return this.singers.map(item => {
         return item.title.substr(0, 1);
       });
+    },
+    fixedTitle() {
+      if (this.scrollY > 0) return false;
+
+      if (this.singers[this.currentIndex]) {
+        return this.singers[this.currentIndex].title;
+      } else {
+        return false;
+      }
     }
   },
   methods: {
     handleTouchStart(e) {
-      const index = e.target.getAttribute("data-index"); //字母表索引
-      const element = this.$refs.list_group[index]; //字母表索引对应数据表的数据
-      this.$refs.listview.scroll.scrollToElement(element); //Better-Scroll切换
+      //触摸点字母索引
+      let anchorIndex = Math.ceil(e.target.getAttribute("data-index"));
+      //把索引保存到公共对象中
+      this.touch.anchorIndex = anchorIndex;
+      //触摸点到窗口顶部的距离
+      this.touch.y1 = e.touches[0].pageY;
+      this._scrollTo(anchorIndex);
+    },
+    handleTouchMove(e) {
+      //滚动点到窗口顶部的距离
+      this.touch.y2 = e.touches[0].pageY;
+      //两值相减求差值，再除去字母高度，求得超出的字母索引
+      let exceed = Math.ceil((this.touch.y2 - this.touch.y1) / SHORTCUT_HEIGHT);
+      //累加到公共对象中
+      let anchorIndex = this.touch.anchorIndex + exceed;
+      if (anchorIndex >= 0 && anchorIndex < this.shortcutList.length) {
+        this._scrollTo(anchorIndex);
+      }
+    },
+    scroll(pos) {
+      this.scrollY = pos.y;
+    },
+    _scrollTo(index) {
+      this.$refs.listview.scrollToElement(this.$refs.list_group[index]); //Better-Scroll切换
+    },
+    _groupHeight() {
+      this.groupHeight = []; //装载所有group的高度, 含滚动距离
+      let height = 0; //第一个group高度为0
+      this.groupHeight.push(height);
+      const groupList = this.$refs.list_group; //所有group
+      groupList.forEach(e => {
+        height += e.clientHeight; //每一次获取group高度, 都要累加之前所有group高度
+        this.groupHeight.push(height);
+      });
+    }
+  },
+  watch: {
+    singers() {
+      setTimeout(() => {
+        this._groupHeight(); //当数据变化, 获取group高度
+      }, 20);
+    },
+    scrollY(newY) {
+      //向上滚动, newY大于0
+      if (newY > 0) {
+        this.currentIndex = 0;
+        return;
+      }
+      //在中间滚动（注意：this.groupHeight高度数组比groupList元素数组多一, 所以遍历时要减1）
+      for (let i = 0; i < this.groupHeight.length - 1; i++) {
+        let currentHeight = this.groupHeight[i]; //当前的group
+        let nextHeight = this.groupHeight[i + 1]; //下一个group
+        if ((-newY >= currentHeight && -newY < nextHeight) || !nextHeight) {
+          //当y轴处于当前group之内, 设置全局索引为当前索引 (注意：y轴向下是负值, 加负号取正)
+          this.currentIndex = i;
+          this.diff = nextHeight + newY;
+          return;
+        }
+      }
+      //滚动到底部, newY已超出最后一个元素的高度, 直接设置全局索引等于最后一个索引
+      this.currentIndex = this.groupHeight.length - 2;
+    },
+    diff(newVal) {
+      let fixedTop = 0;
+      if (newVal < TITLE_HEIGHT) {
+        fixedTop = newVal - TITLE_HEIGHT;
+      } else {
+        fixedTop = 0;
+      }
+      this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
     }
   },
   components: {
@@ -104,4 +207,16 @@ export default {
   font-size: $font-size-small
 &.current
   color: $color-theme
+.fixed-list
+  position: absolute
+  top: 0
+  left: 0
+  width: 100%
+.fixed-title
+  height: 30px
+  line-height: 30px
+  padding-left: 20px
+  font-size: $font-size-small
+  color: $color-text-l
+  background: $color-highlight-background
 </style>

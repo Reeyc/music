@@ -1,7 +1,7 @@
 <!--歌手页-->
 <template>
   <div class="fiexd">
-    <list-view :data="singers"></list-view>
+    <list-view :singers="singers"></list-view>
   </div>
 </template>
 
