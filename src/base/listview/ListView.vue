@@ -37,39 +37,43 @@
       <div class="fixed-title">{{fixedTitle}}</div>
     </div>
     <!-- loading -->
+    <div class="loading-container" v-show="!singers.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script>
 import Scroll from "base/scroll/Scroll";
+import Loading from "base/loading/Loading";
 const SHORTCUT_HEIGHT = 18;
 const TITLE_HEIGHT = 30;
 export default {
   created() {
-    this.touch = {};
-    this.listenScroll = true;
-    this.probeType = 3;
+    this.touch = {}; //共享touch事件距离顶部窗口的距离
+    this.listenScroll = true; //传递给scroll组件，是否监听scroll事件
+    this.probeType = 3; //传递给scroll组件，是否时时刻刻执行scroll事件
   },
   data() {
     return {
-      scrollY: -1,
-      currentIndex: 0,
-      diff: -1
+      scrollY: -1, //接收scroll组件返回的Y轴坐标值
+      currentIndex: 0, //左右联动的全局索引
+      diff: -1 //每个group距离顶部的距离
     };
   },
   props: {
-    singers: {
+    singers: { //歌手数据
       type: Array,
       default: []
     }
   },
   computed: {
-    shortcutList() {
+    shortcutList() { //字母表处理
       return this.singers.map(item => {
         return item.title.substr(0, 1);
       });
     },
-    fixedTitle() {
+    fixedTitle() { //固定标题处理
       if (this.scrollY > 0) return false;
 
       if (this.singers[this.currentIndex]) {
@@ -101,7 +105,7 @@ export default {
       }
     },
     scroll(pos) {
-      this.scrollY = pos.y;
+      this.scrollY = pos.y; //执行scroll组件派发的事件，并接收传过来的数据
     },
     _scrollTo(index) {
       this.$refs.listview.scrollToElement(this.$refs.list_group[index]); //Better-Scroll切换
@@ -145,16 +149,18 @@ export default {
     },
     diff(newVal) {
       let fixedTop = 0;
-      if (newVal < TITLE_HEIGHT) {
+      if (newVal < TITLE_HEIGHT) { //如果group的距离小于标题高度，则求得偏移值
         fixedTop = newVal - TITLE_HEIGHT;
       } else {
         fixedTop = 0;
       }
-      this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
+      //设置样式滑动偏移
+      this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`;
     }
   },
   components: {
-    Scroll
+    Scroll,
+    Loading
   }
 };
 </script>
@@ -219,4 +225,9 @@ export default {
   font-size: $font-size-small
   color: $color-text-l
   background: $color-highlight-background
+.loading-container
+  position: absolute
+  width: 100%
+  top: 50%
+  transform: translateY(-50%)
 </style>
