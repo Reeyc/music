@@ -1,7 +1,12 @@
 <!--歌手页-->
 <template>
-  <div class="fiexd">
-    <list-view :singers="singers"></list-view>
+  <div>
+    <div class="fiexd">
+      <list-view :singers="singers" @locaItem="location"></list-view>
+    </div>
+    <transition name="slide">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -9,6 +14,8 @@
 import ListView from "base/listview/ListView";
 import { getSingerList } from "api/singer";
 import { ERR_OK } from "api/config";
+import Singer from "common/js/singer";
+import { mapMutations } from "vuex";
 const HOT_NAME = "热门";
 const HOT_SINGER_LEN = 10;
 export default {
@@ -21,6 +28,11 @@ export default {
     this._getSingerList();
   },
   methods: {
+    ...mapMutations(["SET_SINGERS"]),
+    location(item) {
+      this.$router.push(`/singer/${item.id}`);
+      this.SET_SINGERS(item); //设置mutation
+    },
     _getSingerList() {
       getSingerList().then(res => {
         if (res.code !== ERR_OK) return;
@@ -39,13 +51,7 @@ export default {
       list.forEach((item, index) => {
         //处理热门数据
         if (index < HOT_SINGER_LEN) {
-          map.hot.item.push({
-            id: item.Fsinger_mid,
-            name: item.Fsinger_name,
-            avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${
-              item.Fsinger_mid
-            }.jpg?max_age=2592000`
-          });
+          map.hot.item.push(new Singer(item.Fsinger_mid, item.Fsinger_name));
         }
         //==============
         //处理ABCDE...数据
@@ -56,13 +62,7 @@ export default {
             item: []
           };
         }
-        map[key].item.push({
-          id: item.Fsinger_mid,
-          name: item.Fsinger_name,
-          avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${
-            item.Fsinger_mid
-          }.jpg?max_age=2592000`
-        });
+        map[key].item.push(new Singer(item.Fsinger_mid, item.Fsinger_name));
       });
       //=============
       //map是对象(无序), 处理排序问题
@@ -96,4 +96,9 @@ export default {
   top: 88px
   bottom: 0
   width: 100%
+// 组件切换动画
+.slide-enter, .slide-leave-to
+  transform: translate3d(100%, 0, 0)
+.slide-enter-active, .slide-leave-active
+  transition: all 0.3s
 </style>

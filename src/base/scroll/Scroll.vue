@@ -1,3 +1,4 @@
+<!--通用滚动组件-->
 <template>
   <div ref="wrapper">
     <slot></slot>

@@ -15,13 +15,17 @@ export default new Router({
       keepAlive: true
     }
   }, {
+    path: '/singer',
+    name: 'singer',
+    component: () => import('@/components/Singer/Singer'),
+    children: [{
+      path: ':id',
+      component: r => import('@/components/Singer/children/Detail').then((module) => r(module))
+    }]
+  }, {
     path: '/rank',
     name: 'rank',
     component: () => import('@/components/Rank/Rank')
-  }, {
-    path: '/singer',
-    name: 'singer',
-    component: () => import('@/components/Singer/Singer')
   }, {
     path: '/search',
     name: 'search',

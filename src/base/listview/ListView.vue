@@ -1,3 +1,4 @@
+<!--通用字母表滚动组件-->
 <template>
   <scroll
     class="list-view"
@@ -11,7 +12,12 @@
       <div v-for="(group,index) of singers" :key="index" class="list-group" ref="list_group">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="item of group.item" :key="item.id" class="list-group-item">
+          <li
+            v-for="item of group.item"
+            :key="item.id"
+            @click="location(item)"
+            class="list-group-item"
+          >
             <img v-lazy="item.avatar" class="avatar">
             <span class="name">{{item.name}}</span>
           </li>
@@ -62,18 +68,21 @@ export default {
     };
   },
   props: {
-    singers: { //歌手数据
+    singers: {
+      //歌手数据
       type: Array,
       default: []
     }
   },
   computed: {
-    shortcutList() { //字母表处理
+    shortcutList() {
+      //字母表处理
       return this.singers.map(item => {
         return item.title.substr(0, 1);
       });
     },
-    fixedTitle() { //固定标题处理
+    fixedTitle() {
+      //固定标题处理
       if (this.scrollY > 0) return false;
 
       if (this.singers[this.currentIndex]) {
@@ -84,6 +93,9 @@ export default {
     }
   },
   methods: {
+    location(item) {
+      this.$emit("locaItem", item);
+    },
     handleTouchStart(e) {
       //触摸点字母索引
       let anchorIndex = Math.ceil(e.target.getAttribute("data-index"));
@@ -149,7 +161,8 @@ export default {
     },
     diff(newVal) {
       let fixedTop = 0;
-      if (newVal < TITLE_HEIGHT) { //如果group的距离小于标题高度，则求得偏移值
+      if (newVal < TITLE_HEIGHT) {
+        //如果group的距离小于标题高度，则求得偏移值
         fixedTop = newVal - TITLE_HEIGHT;
       } else {
         fixedTop = 0;

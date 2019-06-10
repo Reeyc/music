@@ -1,4 +1,4 @@
-<!--推荐-->
+<!--推荐页-->
 <template>
   <div class="fixed">
     <!-- wrapper -->
@@ -104,7 +104,7 @@ export default {
   background-color: #fff
 .fixed
   position: fixed
-  bottom: 0 /* fixed + bottom:0 设置元素高度为当前页面可视区域高度，配合Better-Scroll，超出高度滚动 */
+  bottom: 0 /* fixed+top:0+bottom:0 设置元素高度为当前页面可视区域高度，配合Better-Scroll，超出高度滚动 */
   top: 88px
   width: 100%
 .wrapper
