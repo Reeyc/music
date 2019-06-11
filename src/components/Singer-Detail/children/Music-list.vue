@@ -220,6 +220,6 @@ export default {
 .loading-container
   position: absolute
   width: 100%
-  top: 50%
+  top: 60%
   transform: translateY(-50%)
 </style>
