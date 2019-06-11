@@ -21,7 +21,7 @@
           <div class="middle-l">
             <div class="cd-wrapper">
               <div class="cd">
-                <img class="image" :src="currentSong.image">
+                <img class="image" :src="currentSong.image" :class="cdCls">
               </div>
             </div>
           </div>
@@ -40,7 +40,7 @@
             </div>
             <!-- 播放按钮 -->
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i :class="playIcon" @click="togglePlaying"></i>
             </div>
             <!-- 下一首 -->
             <div class="icon i-right">
@@ -59,7 +59,7 @@
       <div class="mini-player" @click="open" v-show="!fullScreen">
         <!-- 小图片 -->
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.image">
+          <img width="40" height="40" :src="currentSong.image" :class="cdCls">
         </div>
         <!-- 歌曲信息 -->
         <div class="text">
@@ -67,12 +67,15 @@
           <p class="desc">{{currentSong.singer}}</p>
         </div>
         <!-- 播放按钮 -->
-        <div class="control"></div>
+        <div class="control">
+          <i @click.stop="togglePlaying" :class="miniIcon"></i>
+        </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio :src="currentSong.url" ref="audio"></audio>
   </div>
 </template>
 
@@ -80,20 +83,46 @@
 import { mapState, mapGetters, mapMutations } from "vuex";
 export default {
   computed: {
-    ...mapState(["playlist", "currentIndex", "fullScreen"]),
-    ...mapGetters(["currentSong"])
+    ...mapState(["playlist", "currentIndex", "fullScreen", "playing"]),
+    ...mapGetters(["currentSong"]),
+    //图片旋转类
+    cdCls() {
+      return this.playing ? "play" : "play pause";
+    },
+    //图标播放&暂停类
+    playIcon() {
+      return this.playing ? "icon-pause" : "icon-play";
+    },
+    //底部播放器图标播放&暂停类
+    miniIcon() {
+      return this.playing ? "icon-pause-mini" : "icon-play-mini";
+    }
   },
   methods: {
-    ...mapMutations(["SET_FULL_SCREEN"]),
+    ...mapMutations(["SET_FULL_SCREEN", "SET_PLAYING_STATE"]),
     back() {
       this.SET_FULL_SCREEN(false);
     },
     open() {
       this.SET_FULL_SCREEN(true);
+    },
+    //播放&暂停
+    togglePlaying() {
+      this.SET_PLAYING_STATE(!this.playing);
     }
   },
-  updated() {
-    console.log(this.currentSong);
+  watch: {
+    currentSong() {
+      this.$nextTick(() => {
+        this.$refs.audio.play();
+      });
+    },
+    playing(newPlaying) {
+      const audio = this.$refs.audio;
+      this.$nextTick(() => {
+        newPlaying ? audio.play() : audio.pause();
+      });
+    }
   }
 };
 </script>
@@ -101,25 +130,26 @@ export default {
 <style lang="stylus" scoped>
 @import '~common/stylus/variable'
 @import '~common/stylus/mixin'
-.normal-player
-  position: fixed
-  left: 0
-  right: 0
-  top: 0
-  bottom: 0
-  z-index: 150
-  background: $color-background
-  /* normal-player动画 */
-  &.normal-enter-active, &.normal-leave-active
-    transition: all 0.4s
-    .top, .bottom
-      transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32)
-  &.normal-enter, &.normal-leave-to
-    opacity: 0
-    .top
-      transform: translate3d(0, -100px, 0)
-    .bottom
-      transform: translate3d(0, 100px, 0)
+.player
+  .normal-player
+    position: fixed
+    left: 0
+    right: 0
+    top: 0
+    bottom: 0
+    z-index: 150
+    background: $color-background
+    /* normal-player动画 */
+    &.normal-enter-active, &.normal-leave-active
+      transition: all 0.4s
+      .top, .bottom
+        transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32)
+    &.normal-enter, &.normal-leave-to
+      opacity: 0
+      .top
+        transform: translate3d(0, -100px, 0)
+      .bottom
+        transform: translate3d(0, 100px, 0)
 /* 背景图 */
 .background
   position: absolute
@@ -185,6 +215,10 @@ export default {
         box-sizing: border-box
         border: 10px solid rgba(255, 255, 255, 0.1)
         border-radius: 50%
+        &.play
+          animation: rotate 20s linear infinite
+        &.pause
+          animation-play-state: paused
         .image
           position: absolute
           left: 0
@@ -240,6 +274,10 @@ export default {
     padding: 0 10px 0 20px
     img
       border-radius: 50%
+    &.play
+      animation: rotate 10s linear infinite
+    &.pause
+      animation-play-state: paused
   .text
     display: flex
     flex-direction: column
@@ -263,4 +301,9 @@ export default {
     .icon-play-mini, .icon-pause-mini, .icon-playlist
       font-size: 30px
       color: $color-theme-d
+@keyframes rotate
+  0%
+    transform: rotate(0)
+  100%
+    transform: rotate(360deg)
 </style>
