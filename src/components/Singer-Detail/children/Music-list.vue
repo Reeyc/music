@@ -30,7 +30,7 @@
       ref="list"
     >
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs" @select="selectItem"></song-list>
       </div>
     </scroll>
     <!-- loading -->
@@ -44,6 +44,7 @@
 import Scroll from "base/scroll/Scroll";
 import SongList from "base/songlist/Song-list";
 import Loading from "base/loading/Loading";
+import { mapActions } from "vuex";
 const TITLE_HEIGHT = 40;
 export default {
   props: {
@@ -81,11 +82,19 @@ export default {
     }
   },
   methods: {
+    ...mapActions(["selectPlay"]),
     back() {
       this.$router.back();
     },
     scroll(pos) {
       this.scrollY = pos.y;
+    },
+    //vuex.actions批量修改mutation
+    selectItem(item, index) {
+      this.selectPlay({
+        list: this.songs,
+        index
+      });
     }
   },
   watch: {
