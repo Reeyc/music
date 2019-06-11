@@ -10,17 +10,20 @@
     <transition name="slide">
       <router-view v-if="!$route.meta.keepAlive"></router-view>
     </transition>
+    <Player></Player>
   </div>
 </template>
 
 <script>
 import MHeader from "@/components/Header/Header";
 import MNav from "@/components/Nav/Nav";
+import Player from "@/components/Player/Player";
 export default {
   name: "App",
   components: {
     MHeader,
-    MNav
+    MNav,
+    Player
   }
 };
 </script>
