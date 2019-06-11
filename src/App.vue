@@ -3,9 +3,13 @@
     <m-header></m-header>
     <m-nav></m-nav>
     <keep-alive>
-      <router-view v-if="$route.meta.keepAlive"></router-view>
+      <transition name="slide">
+        <router-view v-if="$route.meta.keepAlive"></router-view>
+      </transition>
     </keep-alive>
-    <router-view v-if="!$route.meta.keepAlive"></router-view>
+    <transition name="slide">
+      <router-view v-if="!$route.meta.keepAlive"></router-view>
+    </transition>
   </div>
 </template>
 
@@ -21,5 +25,10 @@ export default {
 };
 </script>
 
-<style lang="stylus" scoped></style>
+<style lang="stylus" scoped>
+.slide-enter, .slide-leave-to
+  opacity: 0
+.slide-enter-active, .slide-leave-active
+  transition: all 0.5s
+</style>
 

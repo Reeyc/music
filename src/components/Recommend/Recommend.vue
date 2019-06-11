@@ -1,9 +1,7 @@
 <!--推荐页-->
 <template>
   <div class="fixed">
-    <!-- wrapper -->
     <scroll :data="recommendList" class="wrapper" ref="scroll">
-      <!-- slot -->
       <div>
         <!-- 轮播图 -->
         <swiper :options="swiperOptions" v-if="slideLength" class="slide-wrapper">

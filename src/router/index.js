@@ -20,7 +20,7 @@ export default new Router({
     component: () => import('@/components/Singer/Singer'),
     children: [{
       path: ':id',
-      component: r => import('@/components/Singer/children/Detail').then((module) => r(module))
+      component: r => import('@/components/Singer-Detail/Detail').then((module) => r(module))
     }]
   }, {
     path: '/rank',

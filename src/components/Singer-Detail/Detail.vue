@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import MusicList from "./Music-list";
+import MusicList from "./children/Music-list";
 import { getSingerDetail } from "api/singer";
 import { ERR_OK } from "api/config";
 import { createSong } from "common/js/song";

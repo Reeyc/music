@@ -9,19 +9,19 @@
 import BScroll from "better-scroll";
 export default {
   props: {
-    probeType: {
+    probeType: { //是否实时监听Better-Scroll钩子事件 (默认不监听)
       type: Number,
       default: 1
     },
-    click: {
+    click: { //Better-Scroll会阻止click事件, 是否代替浏览器派发一个click事件 (默认是)
       type: Boolean,
       default: true
     },
-    data: {
+    data: { //数据
       type: Array,
       default: null
     },
-    listenScroll: {
+    listenScroll: { //是否执行scroll事件, 并传递数据出去
       type: Boolean,
       default: false
     }
@@ -32,7 +32,7 @@ export default {
     }, 50);
   },
   methods: {
-    _initScroll() {
+    _initScroll() { //初始化Better-Scroll
       if (!this.$refs.wrapper) return;
       this.scroll = new BScroll(this.$refs.wrapper, {
         probeType: this.probeType,
@@ -62,7 +62,7 @@ export default {
   watch: {
     data() {
       setTimeout(() => {
-        this.refresh();
+        this.refresh(); //当数据变化, 重新计算高度
       }, 50);
     }
   }
